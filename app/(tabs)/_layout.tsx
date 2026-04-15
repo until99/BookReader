@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router';
 
 import Ionicons from '@expo/vector-icons/Ionicons';
-import Header from '../components/layout/Header';
+import Header from '@/components/layout/Header';
 
 
 export default function TabLayout() {

@@ -1,30 +1,30 @@
 import { useEffect, useState } from 'react';
-import { DATA } from '@/app/hooks/books';
 import { useLocalSearchParams } from 'expo-router';
 import { Button, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { type Book } from '@/app/types/Book';
+import { type Book } from '@/types/Book';
+import { AddToCollectionModal } from '@/components/Collections/AddToCollectionModal';
+import { useBooks } from '@/hooks/useBooks';
 
 export default function BookDetails() {
   const { id } = useLocalSearchParams();
-  const [book, setBook] = useState<typeof DATA[0] | Book>({
+  const { books } = useBooks();
+  const [book, setBook] = useState<Book>({
     id: '',
     title: '',
     description: '',
     bookCover: '',
   });
+  const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
-    const fetchBookDetails = () => {
-      return DATA.find((item) => item.id === id);
-    };
-    setBook(fetchBookDetails() || {
-      id: '',
-      title: '',
-      description: '',
-      bookCover: '',
-    });
-  }, [id]);
+    if (id && books.length > 0) {
+      const foundBook = books.find((item) => item.id === id);
+      if (foundBook) {
+        setBook(foundBook);
+      }
+    }
+  }, [id, books]);
 
   return (
     <SafeAreaProvider style={styles.container}>
@@ -39,17 +39,17 @@ export default function BookDetails() {
         <View style={{ flex: 1, justifyContent: "center", gap: 10 }}>
           <Pressable
             style={styles.addToLibraryButton}
-            onPress={() => alert('Book added to library!')}
-            accessibilityLabel="Add this book to your library"
+            onPress={() => setModalVisible(true)}
+            accessibilityLabel="Add this book to a collection"
           >
-            <Text style={{ color: '#004a77', fontWeight: '500' }}>Add to Library</Text>
+            <Text style={{ color: '#004a77', fontWeight: '500' }}>Add to Collection</Text>
           </Pressable>
           <Pressable
             style={styles.startReadingButton}
             onPress={() => alert('Starting reading!')}
             accessibilityLabel="Start reading this book"
           >
-            
+
             <Text style={{ color: '#e8e6e3', fontWeight: '500' }}>Start Reading</Text>
           </Pressable>
         </View>
@@ -63,6 +63,13 @@ export default function BookDetails() {
           {book?.description}
         </Text>
       </View>
+
+      <AddToCollectionModal
+        visible={modalVisible}
+        bookId={book?.id || ''}
+        bookTitle={book?.title || ''}
+        onClose={() => setModalVisible(false)}
+      />
     </SafeAreaProvider>
   );
 }
